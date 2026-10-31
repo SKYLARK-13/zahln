@@ -19,6 +19,6 @@ export function orderIdFromQr(raw: string) {
   return text;
 }
 
-export function newIdempotencyKey() {
-  return `pay-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+export function newIdempotencyKey(kind = "pay") {
+  return `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }

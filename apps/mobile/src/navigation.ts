@@ -6,4 +6,8 @@ export type RootStackParamList = {
   PayResult: { paymentId: string };
   History: undefined;
   PaymentDetail: { paymentId: string };
+  TillHome: undefined;
+  TillWait: { orderId: string };
+  TillRefunds: undefined;
+  TillRefund: { paymentId: string };
 };

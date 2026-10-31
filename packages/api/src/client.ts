@@ -2,10 +2,12 @@ import { ApiError } from "./error";
 import type {
   DailyTotals,
   ListPaymentsQuery,
+  Mensa,
   Order,
   Payment,
   PaymentDetail,
   PaymentPage,
+  Refund,
   Session,
 } from "./types";
 
@@ -54,6 +56,20 @@ export class ZahlnClient {
     });
   }
 
+  listMensas() {
+    return this.request<{ items: Mensa[] }>({ method: "GET", path: "/mensas" });
+  }
+
+  // same Idempotency-Key when retrying create order
+  createOrder(items: { itemId: string; quantity: number }[], idempotencyKey: string) {
+    return this.request<Order>({
+      method: "POST",
+      path: "/orders",
+      body: { items },
+      idempotencyKey,
+    });
+  }
+
   getOrder(orderId: string) {
     return this.request<Order>({ method: "GET", path: `/orders/${orderId}` });
   }
@@ -81,6 +97,20 @@ export class ZahlnClient {
     return this.request<PaymentDetail>({
       method: "GET",
       path: `/payments/${paymentId}`,
+    });
+  }
+
+  createRefund(
+    paymentId: string,
+    amountCents: number,
+    idempotencyKey: string,
+    reason?: string,
+  ) {
+    return this.request<Refund>({
+      method: "POST",
+      path: `/payments/${paymentId}/refunds`,
+      body: { amountCents, reason: reason || null },
+      idempotencyKey,
     });
   }
 

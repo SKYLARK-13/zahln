@@ -13,6 +13,10 @@ import { PaymentDetailScreen } from "./src/screens/PaymentDetail";
 import { PayResultScreen } from "./src/screens/PayResult";
 import { PickUserScreen } from "./src/screens/PickUser";
 import { ScanScreen } from "./src/screens/Scan";
+import { TillHomeScreen } from "./src/screens/TillHome";
+import { TillRefundScreen } from "./src/screens/TillRefund";
+import { TillRefundsScreen } from "./src/screens/TillRefunds";
+import { TillWaitScreen } from "./src/screens/TillWait";
 import { SessionProvider, useSession } from "./src/session";
 import { colors } from "./src/theme";
 
@@ -22,6 +26,7 @@ function Root() {
   const [locale, setLocale] = useState<Locale>("de");
   const t = copy[locale];
   const { ready, user } = useSession();
+  const isTill = user?.role === "cashier";
 
   function toggleLocale() {
     setLocale((current) => (current === "de" ? "en" : "de"));
@@ -45,6 +50,28 @@ function Root() {
               <PickUserScreen {...props} t={t} onToggleLocale={toggleLocale} />
             )}
           </Stack.Screen>
+        ) : isTill ? (
+          <>
+            <Stack.Screen name="TillHome">
+              {(props) => (
+                <TillHomeScreen
+                  {...props}
+                  t={t}
+                  locale={locale}
+                  onToggleLocale={toggleLocale}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="TillWait">
+              {(props) => <TillWaitScreen {...props} t={t} locale={locale} />}
+            </Stack.Screen>
+            <Stack.Screen name="TillRefunds">
+              {(props) => <TillRefundsScreen {...props} t={t} locale={locale} />}
+            </Stack.Screen>
+            <Stack.Screen name="TillRefund">
+              {(props) => <TillRefundScreen {...props} t={t} locale={locale} />}
+            </Stack.Screen>
+          </>
         ) : (
           <>
             <Stack.Screen name="Home">

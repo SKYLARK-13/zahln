@@ -4,9 +4,9 @@ Take-home for Zahln. npm workspaces.
 
 - `packages/api` – shared types + fetch client
 - `apps/web` – Studierendenwerk dashboard
-- `apps/mobile` – student app (Expo)
+- `apps/mobile` – student app + till (one Expo app, pick mode at start)
 
-Till app is not in here yet.
+Install once, open as **Student** on one device and **Till** on another (or emulator).
 
 ## Dashboard
 
@@ -35,9 +35,27 @@ npm run android
 
 That builds a native debug APK, installs it on the emulator/USB phone, and starts Metro. Camera/QR work in this build.
 
-Pick `student`, `staff` or `guest`. Password is always `test1234`.
-PIN fallback for payments: `1234`.
+At start pick **Student app** or **Till**.
 
-For a physical phone: enable USB debugging, plug in, then `npm run android`.
+- Student: `student` / `staff` / `guest`
+- Till: `cashier-campus-1` (or other cashiers)
 
-Expo Go notes (optional): see `apps/mobile/CONNECT-PHONE.md`.
+Password is always `test1234`. PIN fallback for payments: `1234`.
+
+Flow to test: till rings up → show QR → student scans / pastes order id → pay → till shows paid. Refunds from till menu.
+
+For a physical phone: enable USB debugging, plug in, then `npm run android` (or use emulator). See `apps/mobile/CONNECT-PHONE.md`.
+
+## AI tools
+
+Cursor Agent helped with scaffolding, API client, dashboard, student/till screens, and Expo notes. I own the code for the review call.
+
+## AI tools
+
+Cursor Agent was used while building this take-home:
+
+- scaffolding the monorepo, shared API client, dashboard and student app
+- wiring payment idempotency / session refresh / versioned reads
+- Expo / Android setup notes and small UI cleanup
+
+I review and own the code; the review call is on me. Commits show `Co-authored-by: Cursor` because the agent helped write them — that matches “use any AI tools you want, say which and for what.”

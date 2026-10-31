@@ -5,10 +5,18 @@ import { loginErrorMessage, useSession } from "../session";
 import { colors } from "../theme";
 import { Card, LinkButton, PrimaryButton, Screen } from "../ui";
 
-const users = [
+type Mode = "student" | "till";
+
+const studentUsers = [
   { username: "student", labelKey: "student" as const },
   { username: "staff", labelKey: "staff" as const },
   { username: "guest", labelKey: "guest" as const },
+];
+
+const tillUsers = [
+  { username: "cashier-campus-1", labelKey: "cashierCampus1" as const },
+  { username: "cashier-nord-1", labelKey: "cashierNord1" as const },
+  { username: "cashier-bibliothek-1", labelKey: "cashierBib1" as const },
 ];
 
 type Props = {
@@ -18,12 +26,20 @@ type Props = {
 
 export function PickUserScreen({ t, onToggleLocale }: Props) {
   const { login } = useSession();
+  const [mode, setMode] = useState<Mode>("student");
   const [username, setUsername] = useState("student");
   const [candidateId, setCandidateId] = useState(
     process.env.EXPO_PUBLIC_CANDIDATE_ID || "",
   );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const users = mode === "student" ? studentUsers : tillUsers;
+
+  function pickMode(next: Mode) {
+    setMode(next);
+    setUsername(next === "student" ? "student" : "cashier-campus-1");
+  }
 
   async function onContinue() {
     setBusy(true);
@@ -48,8 +64,36 @@ export function PickUserScreen({ t, onToggleLocale }: Props) {
         <LinkButton label={t.lang} onPress={onToggleLocale} />
       </View>
 
-      <Text style={styles.title}>{t.pickTitle}</Text>
-      <Text style={styles.hint}>{t.pickHint}</Text>
+      <Text style={styles.title}>{t.pickModeTitle}</Text>
+      <Text style={styles.hint}>{t.pickModeHint}</Text>
+
+      <View style={styles.modeRow}>
+        <Pressable
+          style={[styles.mode, mode === "student" && styles.modeOn]}
+          onPress={() => pickMode("student")}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.modeText, mode === "student" && styles.modeTextOn]}>
+            {t.modeStudent}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.mode, mode === "till" && styles.modeOn]}
+          onPress={() => pickMode("till")}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.modeText, mode === "till" && styles.modeTextOn]}>
+            {t.modeTill}
+          </Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.title}>
+        {mode === "student" ? t.pickTitle : t.pickTillTitle}
+      </Text>
+      <Text style={styles.hint}>
+        {mode === "student" ? t.pickHint : t.pickTillHint}
+      </Text>
 
       <Card style={styles.card}>
         <View style={styles.chooser}>
@@ -102,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   brand: {
     fontSize: 22,
@@ -110,15 +154,41 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "600",
     color: colors.ink,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   hint: {
     color: colors.muted,
-    marginBottom: 16,
+    marginBottom: 12,
     lineHeight: 20,
+  },
+  modeRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+  mode: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    backgroundColor: colors.paper,
+  },
+  modeOn: {
+    borderColor: colors.accent,
+    backgroundColor: "#e7efe9",
+  },
+  modeText: {
+    color: colors.ink,
+    fontWeight: "500",
+  },
+  modeTextOn: {
+    color: colors.accent,
+    fontWeight: "700",
   },
   card: {
     gap: 14,
