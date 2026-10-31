@@ -27,23 +27,17 @@ Login: `finance` / `test1234`
 
 Same `.env` can also set `EXPO_PUBLIC_CANDIDATE_ID` (optional — you can type it in the app).
 
+**Recommended (real Android app, like `react-native run-android` — no Expo Go):**
+
 ```
-npm run dev:mobile
+npm run android
 ```
 
-Then open in Expo Go. Pick `student`, `staff` or `guest`. Password is always `test1234`.
+That builds a native debug APK, installs it on the emulator/USB phone, and starts Metro. Camera/QR work in this build.
+
+Pick `student`, `staff` or `guest`. Password is always `test1234`.
 PIN fallback for payments: `1234`.
 
-### Physical phone not opening?
+For a physical phone: enable USB debugging, plug in, then `npm run android`.
 
-See `apps/mobile/CONNECT-PHONE.md`. Short version:
-
-1. Project is **Expo SDK 58** — update Expo Go (or install the SDK 58 build from https://expo.dev/go).
-2. **USB (easiest on Windows):**
-   ```
-   npm run dev:mobile:usb
-   adb reverse tcp:8081 tcp:8081
-   ```
-   In Expo Go enter: `exp://127.0.0.1:8081`
-3. Or same Wi‑Fi / hotspot, then scan QR **inside Expo Go**.
-4. Tunnel needs Expo login first: `npx expo login` then `npm run dev:mobile:tunnel`.
+Expo Go notes (optional): see `apps/mobile/CONNECT-PHONE.md`.

@@ -1,48 +1,35 @@
-# Open Zahln on a physical Android phone
+# Running on a phone / Android
 
-This project uses **Expo SDK 58**. The Expo Go from Google Play is often still an older SDK, so opening the project shows **"Something went wrong"** / incompatible project.
+## What works today
 
-## 1. Install the matching Expo Go (SDK 58)
+- **Android emulator + Expo Go** — works for day-to-day coding.
+- Enter order ID manually on the Scan screen if you don’t want camera.
 
-1. On your phone, uninstall the Play Store Expo Go (optional but cleaner).
-2. Open this on the phone browser:
-   https://expo.dev/go?sdkVersion=58&platform=android
-3. Download / install that Expo Go build.
+## Expo Go on a physical phone
 
-## 2. Connect to Metro
+This project is **Expo SDK 58**. Play Store Expo Go is often older, so you get “Something went wrong”.
 
-### Option A — USB (most reliable on Windows)
-
-1. Enable **Developer options** + **USB debugging** on the phone.
-2. Plug the phone into the PC (accept the USB debug prompt).
-3. On the PC, with Expo already running (`npm run dev:mobile`), run:
+1. Install matching Expo Go: https://expo.dev/go?sdkVersion=58&platform=android  
+2. USB debugging on, then:
 
 ```powershell
+npm run dev:mobile:usb
 adb reverse tcp:8081 tcp:8081
 ```
 
-4. In Expo Go → **Enter URL manually**:
+3. In Expo Go → Enter URL: `exp://127.0.0.1:8081`
 
-```text
-exp://127.0.0.1:8081
-```
-
-### Option B — same Wi‑Fi
-
-1. Phone and PC on the **same Wi‑Fi** (not phone hotspot unless PC is also on that hotspot).
-2. Start Expo: `npm run dev:mobile`
-3. Scan the QR **inside Expo Go** (not with the normal camera app), or type the `exp://IP:8081` URL shown in the terminal.
-
-### Option C — tunnel (needs Expo login)
+## Native build (like `react-native run-android`)
 
 ```powershell
-npx expo login
-npm run dev:mobile:tunnel
+npm run android
 ```
 
-Then scan the new QR.
+That is Expo’s equivalent of `npx react-native run-android` (`expo run:android`).
 
-## Still failing?
+**Note (Windows):** Expo SDK 58 / RN 0.88 currently fails local CMake/`ninja` builds on many Windows machines (safe-area-context codegen paths). If `npm run android` fails with a `ninja` / `mkdir` error:
 
-- Windows Firewall may block port `8081` — allow Node.js when prompted.
-- Emulator works because Expo downloads the matching Expo Go for the emulator automatically. The physical phone needs the matching APK from step 1.
+- Keep using the **emulator** for development, or
+- Build the installable APK later with **EAS Build** (cloud Linux) for the assignment deliverable.
+
+Do not switch the whole app to bare `react-native init` — same native modules, same Windows issue, more setup.
