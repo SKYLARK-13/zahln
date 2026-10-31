@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation";
 import type { Copy } from "../i18n";
 import { orderIdFromQr } from "../qr";
-import { colors } from "../theme";
+import { colors, type } from "../theme";
 import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Scan"> & {
@@ -15,17 +15,17 @@ type Props = NativeStackScreenProps<RootStackParamList, "Scan"> & {
 export function ScanScreen({ navigation, t }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
   const [manualId, setManualId] = useState("");
-  const [locked, setLocked] = useState(false);
+  const locked = useRef(false);
 
   function openOrder(raw: string) {
     const orderId = orderIdFromQr(raw);
-    if (!orderId || locked) return;
-    setLocked(true);
+    if (!orderId || locked.current) return;
+    locked.current = true;
     navigation.replace("ConfirmPay", { orderId });
   }
 
   return (
-    <Screen>
+    <Screen scroll>
       <LinkButton label={t.back} onPress={() => navigation.goBack()} />
 
       <Text style={styles.title}>{t.scanTitle}</Text>
@@ -55,6 +55,8 @@ export function ScanScreen({ navigation, t }: Props) {
           autoCapitalize="none"
           autoCorrect={false}
           style={styles.input}
+          placeholder="ord_…"
+          placeholderTextColor={colors.muted}
           accessibilityLabel={t.enterOrder}
         />
         <PrimaryButton
@@ -69,15 +71,17 @@ export function ScanScreen({ navigation, t }: Props) {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: type.title,
+    fontWeight: "800",
     color: colors.ink,
     marginTop: 16,
+    letterSpacing: -0.3,
   },
   hint: {
     color: colors.muted,
     marginBottom: 16,
     marginTop: 6,
+    lineHeight: 20,
   },
   cameraCard: {
     padding: 0,
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   camera: {
-    height: 260,
+    height: 280,
   },
   permission: {
     padding: 16,
@@ -99,15 +103,19 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.muted,
-    fontSize: 12,
+    fontSize: type.caption,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     color: colors.ink,
     backgroundColor: "#fff",
+    fontSize: 16,
   },
 });

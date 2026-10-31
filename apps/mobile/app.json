@@ -1,12 +1,18 @@
 {
   "expo": {
     "name": "Zahln",
-    "slug": "zahln-student",
+    "slug": "zahln",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    "extra": {
+      "eas": {
+        "projectId": "5ecb3c8f-35ba-4d86-a4d0-1f8d7d165e39"
+      }
+    },
+    "owner": "vikasdubey13",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {

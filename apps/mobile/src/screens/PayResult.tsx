@@ -6,7 +6,7 @@ import type { RootStackParamList } from "../navigation";
 import { money, paymentStatus } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { useSession } from "../session";
-import { colors } from "../theme";
+import { colors, type } from "../theme";
 import { Card, PrimaryButton, Screen } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PayResult"> & {
@@ -61,7 +61,7 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
 
       {!payment && !error ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.accent} />
+          <ActivityIndicator color={colors.accent} size="large" />
           <Text style={styles.muted}>{t.checking}</Text>
         </View>
       ) : null}
@@ -69,7 +69,13 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {payment ? (
-        <Card style={styles.card}>
+        <Card
+          style={[
+            styles.card,
+            status === "confirmed" && styles.cardOk,
+            status === "declined" && styles.cardBad,
+          ]}
+        >
           <Text style={[styles.status, { color: statusColor }]}>
             {paymentStatus(payment.status, t)}
           </Text>
@@ -95,11 +101,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: type.title,
+    fontWeight: "800",
     color: colors.ink,
     marginBottom: 20,
     textAlign: "center",
+    letterSpacing: -0.3,
   },
   center: {
     alignItems: "center",
@@ -110,16 +117,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
+  cardOk: {
+    backgroundColor: colors.okSoft,
+    borderColor: "#b7e2c7",
+  },
+  cardBad: {
+    backgroundColor: colors.dangerSoft,
+    borderColor: "#f3c2bd",
+  },
   status: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "800",
     marginBottom: 8,
   },
   amount: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: 36,
+    fontWeight: "800",
     color: colors.ink,
     marginVertical: 8,
+    letterSpacing: -0.6,
   },
   muted: {
     color: colors.muted,
@@ -129,6 +145,7 @@ const styles = StyleSheet.create({
     color: colors.danger,
     textAlign: "center",
     marginBottom: 16,
+    fontWeight: "600",
   },
   footer: {
     marginTop: 8,

@@ -15,8 +15,8 @@ import { money, localize } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { newIdempotencyKey } from "../qr";
 import { useSession } from "../session";
-import { colors } from "../theme";
-import { Card, LinkButton, PrimaryButton, Screen } from "../ui";
+import { colors, type } from "../theme";
+import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ConfirmPay"> & {
   t: Copy;
@@ -29,24 +29,31 @@ export function ConfirmPayScreen({ navigation, route, t, locale }: Props) {
   const [order, setOrder] = useState<Order | undefined>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [pinOpen, setPinOpen] = useState(false);
   const [pin, setPin] = useState("");
   const idempotencyKey = useRef(newIdempotencyKey()).current;
 
+  async function loadOrder() {
+    setLoading(true);
+    setError("");
+    try {
+      const next = await client.getOrder(orderId);
+      setOrder((current) => newerByVersion(current, next));
+    } catch (err) {
+      const notFound =
+        isApiError(err) && (err.status === 404 || /not found/i.test(err.message));
+      setError(notFound ? t.orderNotFound : isApiError(err) ? err.message : t.errorGeneric);
+      setOrder(undefined);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    let cancelled = false;
-    client
-      .getOrder(orderId)
-      .then((next) => {
-        if (!cancelled) setOrder((current) => newerByVersion(current, next));
-      })
-      .catch((err) => {
-        if (!cancelled) setError(isApiError(err) ? err.message : t.errorGeneric);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [client, orderId, t.errorGeneric]);
+    void loadOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, orderId]);
 
   async function unlock() {
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -90,25 +97,35 @@ export function ConfirmPayScreen({ navigation, route, t, locale }: Props) {
     }
   }
 
-  if (error && !order) {
-    return (
-      <Screen>
-        <LinkButton label={t.back} onPress={() => navigation.goBack()} />
-        <Text style={styles.error}>{error}</Text>
-      </Screen>
-    );
-  }
-
-  if (!order) {
+  if (loading) {
     return (
       <Screen style={styles.center}>
-        <ActivityIndicator color={colors.accent} />
+        <ActivityIndicator color={colors.accent} size="large" />
       </Screen>
     );
   }
 
+  if (error && !order) {
+    return (
+      <Screen scroll>
+        <LinkButton label={t.back} onPress={() => navigation.goBack()} />
+        <Card style={styles.errorCard}>
+          <Text style={styles.errorTitle}>{t.confirmTitle}</Text>
+          <Text style={styles.error}>{error}</Text>
+          <Text style={styles.muted}>
+            {t.order}: {orderId}
+          </Text>
+          <PrimaryButton label={t.tryAgain} onPress={() => void loadOrder()} />
+          <SecondaryButton label={t.back} onPress={() => navigation.goBack()} />
+        </Card>
+      </Screen>
+    );
+  }
+
+  if (!order) return null;
+
   return (
-    <Screen>
+    <Screen scroll>
       <LinkButton label={t.back} onPress={() => navigation.goBack()} />
 
       <Text style={styles.title}>{t.confirmTitle}</Text>
@@ -184,11 +201,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: type.title,
+    fontWeight: "800",
     color: colors.ink,
     marginTop: 16,
     marginBottom: 14,
+    letterSpacing: -0.3,
   },
   summary: {
     marginBottom: 12,
@@ -201,34 +219,49 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   amount: {
-    fontSize: 36,
-    fontWeight: "700",
+    fontSize: 40,
+    fontWeight: "800",
     color: colors.ink,
     marginTop: 14,
+    letterSpacing: -0.8,
   },
   label: {
     color: colors.muted,
+    fontWeight: "600",
   },
   section: {
-    fontWeight: "600",
+    fontWeight: "800",
     color: colors.ink,
     marginBottom: 8,
+    fontSize: type.section,
   },
   item: {
     color: colors.ink,
-    marginBottom: 6,
+    marginBottom: 8,
+    fontSize: 15,
   },
   error: {
     color: colors.danger,
     marginVertical: 10,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+  errorCard: {
+    marginTop: 24,
+    gap: 12,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: colors.ink,
   },
   footer: {
-    marginTop: "auto",
-    paddingTop: 12,
+    marginTop: 12,
+    paddingBottom: 8,
   },
   modalBg: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(16,35,28,0.45)",
     justifyContent: "center",
     padding: 24,
   },
@@ -236,12 +269,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     letterSpacing: 8,
-    fontSize: 20,
+    fontSize: 22,
     textAlign: "center",
     backgroundColor: "#fff",
   },

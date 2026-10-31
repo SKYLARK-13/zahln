@@ -13,7 +13,7 @@ import { money } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { newIdempotencyKey } from "../qr";
 import { useSession } from "../session";
-import { colors } from "../theme";
+import { colors, type } from "../theme";
 import { Card, LinkButton, PrimaryButton, Screen } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "TillRefund"> & {
@@ -67,13 +67,11 @@ export function TillRefundScreen({ navigation, route, t, locale }: Props) {
         reason.trim() || undefined,
       );
       setInfo(t.refundDone);
-      // new key only after a finished intent — retries keep the same key
       key.current = newIdempotencyKey("refund");
       const fresh = await client.getPayment(paymentId);
       setPayment((current) => newerByVersion(current, fresh));
       setAmount(String(fresh.refundableAmountCents));
     } catch (err) {
-      // show API message (e.g. refund_exceeds_payment, refund_window_closed)
       setError(isApiError(err) ? err.message : t.errorGeneric);
     } finally {
       setBusy(false);
@@ -89,7 +87,7 @@ export function TillRefundScreen({ navigation, route, t, locale }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen scroll>
       <LinkButton label={t.back} onPress={() => navigation.goBack()} />
 
       {payment ? (
@@ -141,10 +139,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 32,
+    fontWeight: "800",
     color: colors.ink,
     marginTop: 12,
+    letterSpacing: -0.5,
   },
   muted: {
     color: colors.muted,
@@ -155,22 +154,27 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.muted,
-    fontSize: 12,
+    fontSize: type.caption,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     backgroundColor: "#fff",
     color: colors.ink,
+    fontSize: 16,
   },
   error: {
     color: colors.danger,
+    fontWeight: "600",
   },
   ok: {
     color: colors.ok,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

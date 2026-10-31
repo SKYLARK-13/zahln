@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -14,8 +13,16 @@ import { localize, money } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { newIdempotencyKey } from "../qr";
 import { useSession } from "../session";
-import { colors } from "../theme";
-import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
+import { colors, type } from "../theme";
+import {
+  Card,
+  GhostButton,
+  HeroBand,
+  LangToggle,
+  LinkButton,
+  PrimaryButton,
+  Screen,
+} from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "TillHome"> & {
   t: Copy;
@@ -106,126 +113,128 @@ export function TillHomeScreen({ navigation, t, locale, onToggleLocale }: Props)
   }
 
   return (
-    <Screen>
-      <View style={styles.header}>
-        <View style={{ flex: 1, paddingRight: 12 }}>
-          <Text style={styles.brand}>{t.appName}</Text>
-          <Text style={styles.muted}>
-            {mensa.name} · {user?.displayName}
-          </Text>
+    <Screen scroll>
+      <HeroBand>
+        <View style={styles.header}>
+          <View style={{ flex: 1, paddingRight: 12 }}>
+            <Text style={styles.brand}>{t.appName}</Text>
+            <Text style={styles.hello}>
+              {mensa.name} · {user?.displayName}
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            <LangToggle label={t.lang} onPress={onToggleLocale} />
+            <Text style={styles.signOut} onPress={() => void logout()}>
+              {t.signOut}
+            </Text>
+          </View>
         </View>
-        <View style={styles.headerActions}>
-          <LinkButton label={t.lang} onPress={onToggleLocale} />
-          <LinkButton label={t.signOut} onPress={() => void logout()} />
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{t.tillHomeTitle}</Text>
+          <GhostButton
+            label={t.refunds}
+            onPress={() => navigation.navigate("TillRefunds")}
+          />
         </View>
-      </View>
+        <Text style={styles.heroHint}>{t.pricesHint}</Text>
+      </HeroBand>
 
-      <Text style={styles.title}>{t.tillHomeTitle}</Text>
-      <Text style={styles.hint}>{t.pricesHint}</Text>
+      <Card style={styles.menu}>
+        {mensa.menu.map((item, index) => {
+          const qty = qtyFor(item.id);
+          return (
+            <View
+              key={item.id}
+              style={[styles.menuRow, index === mensa.menu.length - 1 && styles.menuRowLast]}
+            >
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={styles.rowTitle}>{localize(item.name, locale)}</Text>
+                <Text style={styles.priceLine}>
+                  {money(item.prices.student, locale)} · {money(item.prices.staff, locale)} ·{" "}
+                  {money(item.prices.guest, locale)}
+                </Text>
+              </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
-        <Card style={styles.menu}>
-          {mensa.menu.map((item, index) => {
-            const qty = qtyFor(item.id);
-            return (
-              <View
-                key={item.id}
-                style={[styles.menuRow, index === mensa.menu.length - 1 && styles.menuRowLast]}
-              >
-                <View style={{ flex: 1, paddingRight: 12 }}>
-                  <Text style={styles.rowTitle}>{localize(item.name, locale)}</Text>
-                  <Text style={styles.priceLine}>
-                    {money(item.prices.student, locale)} · {money(item.prices.staff, locale)} ·{" "}
-                    {money(item.prices.guest, locale)}
-                  </Text>
-                </View>
-
-                {qty === 0 ? (
+              {qty === 0 ? (
+                <Pressable
+                  style={({ pressed }) => [styles.addBtn, pressed && styles.pressed]}
+                  onPress={() => addItem(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t.add} ${localize(item.name, locale)}`}
+                >
+                  <Text style={styles.addBtnText}>{t.add}</Text>
+                </Pressable>
+              ) : (
+                <View style={styles.stepper}>
                   <Pressable
-                    style={({ pressed }) => [styles.addBtn, pressed && styles.pressed]}
+                    style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
+                    onPress={() => removeItem(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t.remove}
+                  >
+                    <Text style={styles.stepBtnText}>−</Text>
+                  </Pressable>
+                  <Text style={styles.qty}>{qty}</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
                     onPress={() => addItem(item)}
                     accessibilityRole="button"
-                    accessibilityLabel={`${t.add} ${localize(item.name, locale)}`}
+                    accessibilityLabel={t.add}
                   >
-                    <Text style={styles.addBtnText}>{t.add}</Text>
+                    <Text style={styles.stepBtnText}>+</Text>
                   </Pressable>
-                ) : (
-                  <View style={styles.stepper}>
-                    <Pressable
-                      style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
-                      onPress={() => removeItem(item.id)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t.remove}
-                    >
-                      <Text style={styles.stepBtnText}>−</Text>
-                    </Pressable>
-                    <Text style={styles.qty}>{qty}</Text>
-                    <Pressable
-                      style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
-                      onPress={() => addItem(item)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t.add}
-                    >
-                      <Text style={styles.stepBtnText}>+</Text>
-                    </Pressable>
-                  </View>
-                )}
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </Card>
+
+      <Card style={styles.cart}>
+        <Text style={styles.section}>
+          {t.cart} · {cartCount}
+        </Text>
+        {cart.length === 0 ? (
+          <Text style={styles.muted}>{t.empty}</Text>
+        ) : (
+          cart.map((line) => {
+            const item = mensa.menu.find((entry) => entry.id === line.itemId);
+            return (
+              <View key={line.itemId} style={styles.cartRow}>
+                <Text style={styles.cartName}>
+                  {item ? localize(item.name, locale) : line.itemId}
+                </Text>
+                <View style={styles.stepper}>
+                  <Pressable
+                    style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
+                    onPress={() => removeItem(line.itemId)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t.remove}
+                  >
+                    <Text style={styles.stepBtnText}>−</Text>
+                  </Pressable>
+                  <Text style={styles.qty}>{line.quantity}</Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
+                    onPress={() => setQty(line.itemId, line.quantity + 1)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t.add}
+                  >
+                    <Text style={styles.stepBtnText}>+</Text>
+                  </Pressable>
+                </View>
               </View>
             );
-          })}
-        </Card>
-
-        <Card style={styles.cart}>
-          <Text style={styles.section}>
-            {t.cart} · {cartCount}
-          </Text>
-          {cart.length === 0 ? (
-            <Text style={styles.muted}>{t.empty}</Text>
-          ) : (
-            cart.map((line) => {
-              const item = mensa.menu.find((entry) => entry.id === line.itemId);
-              return (
-                <View key={line.itemId} style={styles.cartRow}>
-                  <Text style={styles.cartName}>
-                    {item ? localize(item.name, locale) : line.itemId}
-                  </Text>
-                  <View style={styles.stepper}>
-                    <Pressable
-                      style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
-                      onPress={() => removeItem(line.itemId)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t.remove}
-                    >
-                      <Text style={styles.stepBtnText}>−</Text>
-                    </Pressable>
-                    <Text style={styles.qty}>{line.quantity}</Text>
-                    <Pressable
-                      style={({ pressed }) => [styles.stepBtn, pressed && styles.pressed]}
-                      onPress={() => setQty(line.itemId, line.quantity + 1)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t.add}
-                    >
-                      <Text style={styles.stepBtnText}>+</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              );
-            })
-          )}
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <PrimaryButton
-            label={t.showQr}
-            busy={busy}
-            disabled={cart.length === 0}
-            onPress={() => void createOrder()}
-          />
-        </Card>
-
-        <SecondaryButton
-          label={t.refunds}
-          onPress={() => navigation.navigate("TillRefunds")}
+          })
+        )}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <PrimaryButton
+          label={t.showQr}
+          busy={busy}
+          disabled={cart.length === 0}
+          onPress={() => void createOrder()}
         />
-      </ScrollView>
+      </Card>
     </Screen>
   );
 }
@@ -239,31 +248,50 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 14,
   },
   headerActions: {
     gap: 12,
     alignItems: "flex-end",
   },
   brand: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.ink,
+    fontSize: type.brand,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: -0.5,
+  },
+  hello: {
+    color: "rgba(255,255,255,0.72)",
+    marginTop: 4,
+    fontWeight: "600",
+  },
+  signOut: {
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "800",
+    fontSize: 13,
   },
   muted: {
     color: colors.muted,
     marginTop: 4,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: colors.ink,
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 6,
   },
-  hint: {
-    color: colors.muted,
-    marginBottom: 14,
-    marginTop: 6,
+  title: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: "900",
+    color: colors.cta,
+    letterSpacing: -0.4,
+  },
+  heroHint: {
+    color: "rgba(255,255,255,0.7)",
     lineHeight: 20,
+    fontSize: 13,
   },
   menu: {
     marginBottom: 14,
@@ -292,9 +320,9 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     backgroundColor: colors.accent,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 11,
     minWidth: 84,
     alignItems: "center",
   },
@@ -335,12 +363,12 @@ const styles = StyleSheet.create({
   },
   cart: {
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 24,
   },
   section: {
-    fontWeight: "700",
+    fontWeight: "800",
     color: colors.ink,
-    fontSize: 16,
+    fontSize: type.section,
   },
   cartRow: {
     flexDirection: "row",
@@ -358,5 +386,6 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.danger,
+    fontWeight: "600",
   },
 });

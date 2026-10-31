@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -20,19 +21,34 @@ import { TillWaitScreen } from "./src/screens/TillWait";
 import { SessionProvider, useSession } from "./src/session";
 import { colors } from "./src/theme";
 
+const LOCALE_KEY = "zahln.locale";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function Root() {
   const [locale, setLocale] = useState<Locale>("de");
+  const [localeReady, setLocaleReady] = useState(false);
   const t = copy[locale];
   const { ready, user } = useSession();
   const isTill = user?.role === "cashier";
 
+  useEffect(() => {
+    Promise.resolve(AsyncStorage.getItem(LOCALE_KEY))
+      .then((raw) => {
+        if (raw === "en" || raw === "de") setLocale(raw);
+      })
+      .catch(() => {})
+      .finally(() => setLocaleReady(true));
+  }, []);
+
   function toggleLocale() {
-    setLocale((current) => (current === "de" ? "en" : "de"));
+    setLocale((current) => {
+      const next: Locale = current === "de" ? "en" : "de";
+      void AsyncStorage.setItem(LOCALE_KEY, next).catch(() => {});
+      return next;
+    });
   }
 
-  if (!ready) {
+  if (!ready || !localeReady) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg }}>
         <ActivityIndicator color={colors.accent} />
@@ -43,7 +59,13 @@ function Root() {
   return (
     <NavigationContainer>
       <StatusBar style="dark" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: "fade_from_bottom",
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      >
         {!user ? (
           <Stack.Screen name="PickUser">
             {(props) => (

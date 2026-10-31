@@ -98,11 +98,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: 26,
+    fontWeight: "800",
     color: colors.ink,
     marginBottom: 12,
     paddingHorizontal: 20,
+    letterSpacing: -0.3,
   },
   list: {
     paddingHorizontal: 20,

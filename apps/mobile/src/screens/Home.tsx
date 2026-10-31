@@ -3,8 +3,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation";
 import type { Copy } from "../i18n";
 import { useSession } from "../session";
-import { colors } from "../theme";
-import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
+import { colors, type } from "../theme";
+import { ActionTile, HeroBand, LangToggle, Screen } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home"> & {
   t: Copy;
@@ -16,26 +16,38 @@ export function HomeScreen({ navigation, t, onToggleLocale }: Props) {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.brand}>{t.appName}</Text>
-          <Text style={styles.muted}>
-            {t.homeHello}, {user?.displayName}
-          </Text>
+      <HeroBand>
+        <View style={styles.header}>
+          <View style={{ flex: 1, paddingRight: 12 }}>
+            <Text style={styles.brand}>{t.appName}</Text>
+            <Text style={styles.hello}>
+              {t.homeHello}, {user?.displayName}
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            <LangToggle label={t.lang} onPress={onToggleLocale} />
+            <Text style={styles.signOut} onPress={() => void logout()}>
+              {t.signOut}
+            </Text>
+          </View>
         </View>
-        <View style={styles.headerActions}>
-          <LinkButton label={t.lang} onPress={onToggleLocale} />
-          <LinkButton label={t.signOut} onPress={() => void logout()} />
-        </View>
+        <Text style={styles.title}>{t.homeTitle}</Text>
+      </HeroBand>
+
+      <View style={styles.actions}>
+        <ActionTile
+          tone="primary"
+          title={t.scanPay}
+          subtitle={t.homePaySub}
+          onPress={() => navigation.navigate("Scan")}
+        />
+        <ActionTile
+          tone="secondary"
+          title={t.history}
+          subtitle={t.homeHistorySub}
+          onPress={() => navigation.navigate("History")}
+        />
       </View>
-
-      <Text style={styles.title}>{t.homeTitle}</Text>
-
-      <Card style={styles.card}>
-        <Text style={styles.cardHint}>{t.scanHint}</Text>
-        <PrimaryButton label={t.scanPay} onPress={() => navigation.navigate("Scan")} />
-        <SecondaryButton label={t.history} onPress={() => navigation.navigate("History")} />
-      </Card>
     </Screen>
   );
 }
@@ -44,32 +56,36 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 28,
+    marginBottom: 16,
   },
   headerActions: {
-    gap: 14,
+    gap: 12,
     alignItems: "flex-end",
   },
   brand: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: colors.ink,
+    fontSize: type.brand,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: -0.5,
   },
-  muted: {
-    color: colors.muted,
+  hello: {
+    color: "rgba(255,255,255,0.72)",
     marginTop: 4,
+    fontSize: 15,
+    fontWeight: "600",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "600",
-    marginBottom: 16,
-    color: colors.ink,
+    fontSize: 30,
+    fontWeight: "900",
+    color: colors.cta,
+    letterSpacing: -0.6,
   },
-  card: {
-    gap: 12,
+  signOut: {
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "800",
+    fontSize: 13,
   },
-  cardHint: {
-    color: colors.muted,
-    marginBottom: 4,
+  actions: {
+    gap: 14,
   },
 });

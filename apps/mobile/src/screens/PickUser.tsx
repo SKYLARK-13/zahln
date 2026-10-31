@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Copy } from "../i18n";
 import { loginErrorMessage, useSession } from "../session";
-import { colors } from "../theme";
-import { Card, LinkButton, PrimaryButton, Screen } from "../ui";
+import { colors, type } from "../theme";
+import { Card, HeroBand, LangToggle, PrimaryButton, Screen } from "../ui";
 
 type Mode = "student" | "till";
 
@@ -58,14 +58,18 @@ export function PickUserScreen({ t, onToggleLocale }: Props) {
   }
 
   return (
-    <Screen style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>{t.appName}</Text>
-        <LinkButton label={t.lang} onPress={onToggleLocale} />
-      </View>
-
-      <Text style={styles.title}>{t.pickModeTitle}</Text>
-      <Text style={styles.hint}>{t.pickModeHint}</Text>
+    <Screen scroll>
+      <HeroBand>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.brand}>{t.appName}</Text>
+            <Text style={styles.brandSub}>Campus payments</Text>
+          </View>
+          <LangToggle label={t.lang} onPress={onToggleLocale} />
+        </View>
+        <Text style={styles.heroTitle}>{t.pickModeTitle}</Text>
+        <Text style={styles.heroHint}>{t.pickModeHint}</Text>
+      </HeroBand>
 
       <View style={styles.modeRow}>
         <Pressable
@@ -88,7 +92,7 @@ export function PickUserScreen({ t, onToggleLocale }: Props) {
         </Pressable>
       </View>
 
-      <Text style={styles.title}>
+      <Text style={styles.section}>
         {mode === "student" ? t.pickTitle : t.pickTillTitle}
       </Text>
       <Text style={styles.hint}>
@@ -122,8 +126,11 @@ export function PickUserScreen({ t, onToggleLocale }: Props) {
           autoCapitalize="none"
           autoCorrect={false}
           style={styles.input}
+          placeholder="c_…"
+          placeholderTextColor={colors.muted}
           accessibilityLabel={t.candidateId}
         />
+        <Text style={styles.fieldHint}>{t.candidateHint}</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -139,30 +146,47 @@ export function PickUserScreen({ t, onToggleLocale }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    justifyContent: "center",
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+    alignItems: "flex-start",
+    marginBottom: 18,
   },
   brand: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: colors.ink,
+    fontSize: type.brand,
+    fontWeight: "900",
+    color: "#fff",
+    letterSpacing: -0.6,
   },
-  title: {
+  brandSub: {
+    marginTop: 4,
+    color: colors.cta,
+    fontWeight: "700",
+    fontSize: type.label,
+  },
+  heroTitle: {
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  heroHint: {
+    color: "rgba(255,255,255,0.72)",
+    lineHeight: 20,
+    fontSize: 14,
+  },
+  section: {
+    fontSize: 20,
+    fontWeight: "800",
     color: colors.ink,
     marginBottom: 6,
   },
   hint: {
     color: colors.muted,
-    marginBottom: 12,
+    marginBottom: 14,
     lineHeight: 20,
+    fontSize: 14,
   },
   modeRow: {
     flexDirection: "row",
@@ -171,65 +195,79 @@ const styles = StyleSheet.create({
   },
   mode: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: "center",
     backgroundColor: colors.paper,
   },
   modeOn: {
     borderColor: colors.accent,
-    backgroundColor: "#e7efe9",
+    backgroundColor: colors.accentSoft,
   },
   modeText: {
     color: colors.ink,
-    fontWeight: "500",
+    fontWeight: "700",
+    fontSize: 14,
   },
   modeTextOn: {
-    color: colors.accent,
-    fontWeight: "700",
+    color: colors.accentDark,
+    fontWeight: "900",
   },
   card: {
     gap: 14,
+    marginBottom: 24,
   },
   chooser: {
     gap: 10,
   },
   option: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 15,
     paddingHorizontal: 14,
-    backgroundColor: "#fff",
+    backgroundColor: colors.paper,
   },
   optionOn: {
     borderColor: colors.accent,
-    backgroundColor: "#e7efe9",
+    backgroundColor: colors.accentSoft,
   },
   optionText: {
     color: colors.ink,
     fontSize: 16,
+    fontWeight: "600",
   },
   optionTextOn: {
-    color: colors.accent,
-    fontWeight: "600",
+    color: colors.accentDark,
+    fontWeight: "800",
   },
   label: {
     color: colors.muted,
-    fontSize: 12,
+    fontSize: type.caption,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.line,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     color: colors.ink,
     backgroundColor: "#fff",
+    fontSize: 16,
+  },
+  fieldHint: {
+    color: colors.muted,
+    fontSize: 12,
+    marginTop: -6,
+    lineHeight: 16,
   },
   error: {
     color: colors.danger,
+    fontWeight: "700",
   },
 });
