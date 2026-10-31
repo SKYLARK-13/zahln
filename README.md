@@ -11,7 +11,7 @@ Install once, open as **Student** on one device and **Till** on another (or emul
 ## Dashboard
 
 **Live:** https://zahln-dashboard-c70758.netlify.app  
-Login: `finance` / `test1234` (candidate ID is prefilled on the live build)
+Login: `finance` / `test1234`
 
 Local:
 

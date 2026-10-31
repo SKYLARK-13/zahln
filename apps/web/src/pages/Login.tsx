@@ -5,8 +5,9 @@ import type { Copy } from "../i18n";
 
 export function Login({ t }: { t: Copy }) {
   const { user, login } = useSession();
-  const [username, setUsername] = useState("finance");
-  const [password, setPassword] = useState("test1234");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  // Candidate ID from build env is fine for the take-home sandbox; logins stay empty.
   const [candidateId, setCandidateId] = useState(import.meta.env.VITE_CANDIDATE_ID || "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,7 +30,9 @@ export function Login({ t }: { t: Copy }) {
   return (
     <div className="login">
       <form className="card" onSubmit={onSubmit}>
-        <p className="brand">Zahln</p>
+        <p className="brand notranslate" translate="no">
+          Zahln
+        </p>
         <h1>{t.loginTitle}</h1>
         <p className="hint">{t.loginHint}</p>
         <label>

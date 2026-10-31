@@ -24,7 +24,7 @@ export function App() {
   return (
     <div className="page">
       <header className="topbar">
-        <p className="brand">
+        <p className="brand notranslate" translate="no">
           <span className="brand-mark">Z</span>
           Zahln
           <span>
