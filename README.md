@@ -10,6 +10,11 @@ Install once, open as **Student** on one device and **Till** on another (or emul
 
 ## Dashboard
 
+**Live:** https://zahln-dashboard-c70758.netlify.app  
+Login: `finance` / `test1234` (candidate ID is prefilled on the live build)
+
+Local:
+
 ```
 cp .env.example .env
 ```
@@ -20,8 +25,6 @@ Set `VITE_CANDIDATE_ID` in `.env`, then:
 npm install
 npm run dev:web
 ```
-
-Login: `finance` / `test1234`
 
 ## Student app
 
