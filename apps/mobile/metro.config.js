@@ -6,8 +6,8 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// so we can import @zahln/api from the monorepo
-config.watchFolders = [workspaceRoot];
+// monorepo: watch shared packages + resolve from root node_modules
+config.watchFolders = [...(config.watchFolders || []), workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),

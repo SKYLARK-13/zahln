@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isApiError, newerByVersion, type Payment } from "@zahln/api";
 import type { RootStackParamList } from "../navigation";
@@ -13,6 +7,7 @@ import { money, paymentStatus } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { useSession } from "../session";
 import { colors } from "../theme";
+import { Card, PrimaryButton, Screen } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PayResult"> & {
   t: Copy;
@@ -35,7 +30,6 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
         if (cancelled) return;
         setPayment((current) => newerByVersion(current, next));
 
-        // only confirmed / declined are final — keep polling while pending
         if (next.status === "pending") {
           timer = setTimeout(() => {
             void poll();
@@ -62,7 +56,7 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
     status === "confirmed" ? colors.ok : status === "declined" ? colors.danger : colors.warn;
 
   return (
-    <View style={styles.screen}>
+    <Screen style={styles.screen}>
       <Text style={styles.title}>{t.resultTitle}</Text>
 
       {!payment && !error ? (
@@ -75,7 +69,7 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {payment ? (
-        <View style={styles.card}>
+        <Card style={styles.card}>
           <Text style={[styles.status, { color: statusColor }]}>
             {paymentStatus(payment.status, t)}
           </Text>
@@ -86,25 +80,18 @@ export function PayResultScreen({ navigation, route, t, locale }: Props) {
           <Text style={styles.muted}>
             {payment.mensa.name} · {payment.till.name}
           </Text>
-        </View>
+        </Card>
       ) : null}
 
-      <Pressable
-        style={styles.primary}
-        onPress={() => navigation.popToTop()}
-        accessibilityRole="button"
-      >
-        <Text style={styles.primaryText}>{t.done}</Text>
-      </Pressable>
-    </View>
+      <View style={styles.footer}>
+        <PrimaryButton label={t.done} onPress={() => navigation.popToTop()} />
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    padding: 24,
     justifyContent: "center",
   },
   title: {
@@ -120,11 +107,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    backgroundColor: colors.paper,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: 24,
     alignItems: "center",
     marginBottom: 24,
   },
@@ -148,14 +130,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
-  primary: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  primaryText: {
-    color: "#fff",
-    fontWeight: "600",
+  footer: {
+    marginTop: 8,
   },
 });

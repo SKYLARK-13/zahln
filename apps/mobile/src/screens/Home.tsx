@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation";
 import type { Copy } from "../i18n";
 import { useSession } from "../session";
 import { colors } from "../theme";
+import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home"> & {
   t: Copy;
@@ -14,7 +15,7 @@ export function HomeScreen({ navigation, t, onToggleLocale }: Props) {
   const { user, logout } = useSession();
 
   return (
-    <View style={styles.screen}>
+    <Screen>
       <View style={styles.header}>
         <View>
           <Text style={styles.brand}>{t.appName}</Text>
@@ -23,52 +24,30 @@ export function HomeScreen({ navigation, t, onToggleLocale }: Props) {
           </Text>
         </View>
         <View style={styles.headerActions}>
-          <Pressable onPress={onToggleLocale} accessibilityRole="button">
-            <Text style={styles.link}>{t.lang}</Text>
-          </Pressable>
-          <Pressable onPress={() => void logout()} accessibilityRole="button">
-            <Text style={styles.link}>{t.signOut}</Text>
-          </Pressable>
+          <LinkButton label={t.lang} onPress={onToggleLocale} />
+          <LinkButton label={t.signOut} onPress={() => void logout()} />
         </View>
       </View>
 
       <Text style={styles.title}>{t.homeTitle}</Text>
 
-      <Pressable
-        style={styles.primary}
-        onPress={() => navigation.navigate("Scan")}
-        accessibilityRole="button"
-        accessibilityLabel={t.scanPay}
-      >
-        <Text style={styles.primaryText}>{t.scanPay}</Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.secondary}
-        onPress={() => navigation.navigate("History")}
-        accessibilityRole="button"
-        accessibilityLabel={t.history}
-      >
-        <Text style={styles.secondaryText}>{t.history}</Text>
-      </Pressable>
-    </View>
+      <Card style={styles.card}>
+        <Text style={styles.cardHint}>{t.scanHint}</Text>
+        <PrimaryButton label={t.scanPay} onPress={() => navigation.navigate("Scan")} />
+        <SecondaryButton label={t.history} onPress={() => navigation.navigate("History")} />
+      </Card>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    padding: 24,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 32,
-    marginTop: 12,
+    marginBottom: 28,
   },
   headerActions: {
-    gap: 12,
+    gap: 14,
     alignItems: "flex-end",
   },
   brand: {
@@ -80,38 +59,17 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: 4,
   },
-  link: {
-    color: colors.accent,
-    fontWeight: "600",
-  },
   title: {
     fontSize: 28,
     fontWeight: "600",
-    marginBottom: 24,
+    marginBottom: 16,
     color: colors.ink,
   },
-  primary: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginBottom: 12,
+  card: {
+    gap: 12,
   },
-  primaryText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  secondary: {
-    backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  secondaryText: {
-    color: colors.ink,
-    fontWeight: "600",
+  cardHint: {
+    color: colors.muted,
+    marginBottom: 4,
   },
 });

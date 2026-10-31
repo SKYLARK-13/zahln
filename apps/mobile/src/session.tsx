@@ -46,7 +46,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   storedRef.current = stored;
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
+    // if native storage is missing (bad AsyncStorage version), just continue
+    Promise.resolve(AsyncStorage.getItem(STORAGE_KEY))
       .then((raw) => {
         if (raw) setStored(JSON.parse(raw) as Stored);
       })

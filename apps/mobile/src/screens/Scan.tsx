@@ -1,17 +1,12 @@
 import { useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation";
 import type { Copy } from "../i18n";
 import { orderIdFromQr } from "../qr";
 import { colors } from "../theme";
+import { Card, LinkButton, PrimaryButton, Screen, SecondaryButton } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Scan"> & {
   t: Copy;
@@ -30,126 +25,89 @@ export function ScanScreen({ navigation, t }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
-      <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-        <Text style={styles.back}>{t.back}</Text>
-      </Pressable>
+    <Screen>
+      <LinkButton label={t.back} onPress={() => navigation.goBack()} />
 
       <Text style={styles.title}>{t.scanTitle}</Text>
       <Text style={styles.hint}>{t.scanHint}</Text>
 
-      {!permission?.granted ? (
-        <View style={styles.box}>
-          <Text style={styles.muted}>{t.cameraDenied}</Text>
-          <Pressable style={styles.secondary} onPress={() => void requestPermission()}>
-            <Text style={styles.secondaryText}>{t.continue}</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-          onBarcodeScanned={({ data }) => openOrder(data)}
-        />
-      )}
+      <Card style={styles.cameraCard}>
+        {!permission?.granted ? (
+          <View style={styles.permission}>
+            <Text style={styles.muted}>{t.cameraDenied}</Text>
+            <SecondaryButton label={t.continue} onPress={() => void requestPermission()} />
+          </View>
+        ) : (
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={({ data }) => openOrder(data)}
+          />
+        )}
+      </Card>
 
-      <Text style={styles.label}>{t.enterOrder}</Text>
-      <TextInput
-        value={manualId}
-        onChangeText={setManualId}
-        autoCapitalize="none"
-        autoCorrect={false}
-        style={styles.input}
-        accessibilityLabel={t.enterOrder}
-      />
-      <Pressable
-        style={[styles.primary, !manualId.trim() && styles.disabled]}
-        disabled={!manualId.trim()}
-        onPress={() => openOrder(manualId)}
-        accessibilityRole="button"
-      >
-        <Text style={styles.primaryText}>{t.openOrder}</Text>
-      </Pressable>
-    </View>
+      <Card style={styles.manual}>
+        <Text style={styles.label}>{t.enterOrder}</Text>
+        <TextInput
+          value={manualId}
+          onChangeText={setManualId}
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={styles.input}
+          accessibilityLabel={t.enterOrder}
+        />
+        <PrimaryButton
+          label={t.openOrder}
+          disabled={!manualId.trim()}
+          onPress={() => openOrder(manualId)}
+        />
+      </Card>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    padding: 24,
-  },
-  back: {
-    color: colors.accent,
-    fontWeight: "600",
-    marginBottom: 16,
-    marginTop: 8,
-  },
   title: {
     fontSize: 24,
     fontWeight: "600",
     color: colors.ink,
+    marginTop: 16,
   },
   hint: {
     color: colors.muted,
     marginBottom: 16,
+    marginTop: 6,
+  },
+  cameraCard: {
+    padding: 0,
+    overflow: "hidden",
+    marginBottom: 14,
   },
   camera: {
-    height: 280,
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: 20,
+    height: 260,
   },
-  box: {
-    backgroundColor: colors.paper,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
+  permission: {
     padding: 16,
-    marginBottom: 20,
     gap: 12,
   },
   muted: {
     color: colors.muted,
   },
+  manual: {
+    gap: 12,
+  },
   label: {
     color: colors.muted,
     fontSize: 12,
-    marginBottom: 6,
   },
   input: {
-    backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    marginBottom: 12,
     color: colors.ink,
-  },
-  primary: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  primaryText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  secondary: {
-    backgroundColor: colors.accent,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  secondaryText: {
-    color: "#fff",
-    fontWeight: "600",
+    backgroundColor: "#fff",
   },
 });

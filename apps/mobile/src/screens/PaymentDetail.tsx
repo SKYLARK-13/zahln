@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isApiError, newerByVersion, type PaymentDetail as Detail } from "@zahln/api";
 import type { RootStackParamList } from "../navigation";
@@ -14,6 +7,7 @@ import { dateTime, localize, money, paymentStatus } from "../format";
 import type { Copy, Locale } from "../i18n";
 import { useSession } from "../session";
 import { colors } from "../theme";
+import { Card, LinkButton, Screen } from "../ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PaymentDetail"> & {
   t: Copy;
@@ -42,52 +36,51 @@ export function PaymentDetailScreen({ navigation, route, t, locale }: Props) {
   }, [client, paymentId, t.errorGeneric]);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-        <Text style={styles.back}>{t.back}</Text>
-      </Pressable>
+    <Screen>
+      <LinkButton label={t.back} onPress={() => navigation.goBack()} />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {!payment && !error ? <ActivityIndicator color={colors.accent} /> : null}
+      <ScrollView contentContainerStyle={{ paddingBottom: 32, paddingTop: 12 }}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {!payment && !error ? <ActivityIndicator color={colors.accent} /> : null}
 
-      {payment ? (
-        <View>
-          <Text style={styles.amount}>{money(payment.amountCents, locale)}</Text>
-          <Text style={styles.status}>{paymentStatus(payment.status, t)}</Text>
-          <Text style={styles.muted}>
-            {payment.mensa.name} · {payment.till.name}
-          </Text>
-          <Text style={styles.muted}>
-            {t.created}: {dateTime(payment.createdAt, locale)}
-          </Text>
-          <Text style={styles.muted}>
-            {t.order}: {payment.orderId}
-          </Text>
+        {payment ? (
+          <>
+            <Card style={styles.summary}>
+              <Text style={styles.amount}>{money(payment.amountCents, locale)}</Text>
+              <Text style={styles.status}>{paymentStatus(payment.status, t)}</Text>
+              <Text style={styles.muted}>
+                {payment.mensa.name} · {payment.till.name}
+              </Text>
+              <Text style={styles.muted}>
+                {t.created}: {dateTime(payment.createdAt, locale)}
+              </Text>
+              <Text style={styles.muted}>
+                {t.order}: {payment.orderId}
+              </Text>
+            </Card>
 
-          <Text style={styles.section}>{t.items}</Text>
-          {payment.items.map((item) => (
-            <Text key={item.itemId} style={styles.item}>
-              {item.quantity}× {localize(item.name, locale)} ·{" "}
-              {money(item.unitPriceCents * item.quantity, locale)}
-            </Text>
-          ))}
-        </View>
-      ) : null}
-    </ScrollView>
+            <Card style={styles.items}>
+              <Text style={styles.section}>{t.items}</Text>
+              {payment.items.map((item) => (
+                <Text key={item.itemId} style={styles.item}>
+                  {item.quantity}× {localize(item.name, locale)} ·{" "}
+                  {money(item.unitPriceCents * item.quantity, locale)}
+                </Text>
+              ))}
+            </Card>
+          </>
+        ) : null}
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    padding: 24,
+  summary: {
+    marginBottom: 12,
   },
-  back: {
-    color: colors.accent,
-    fontWeight: "600",
-    marginBottom: 16,
-    marginTop: 8,
+  items: {
+    marginBottom: 12,
   },
   amount: {
     fontSize: 32,
@@ -105,7 +98,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   section: {
-    marginTop: 20,
     marginBottom: 8,
     fontWeight: "600",
     color: colors.ink,
