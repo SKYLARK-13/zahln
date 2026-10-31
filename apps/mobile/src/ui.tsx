@@ -58,7 +58,11 @@ export function PrimaryButton({
 }) {
   return (
     <Pressable
-      style={[styles.primary, (disabled || busy) && styles.disabled]}
+      style={({ pressed }) => [
+        styles.primary,
+        pressed && styles.pressed,
+        (disabled || busy) && styles.disabled,
+      ]}
       disabled={disabled || busy}
       onPress={onPress}
       accessibilityRole="button"
@@ -80,7 +84,11 @@ export function SecondaryButton({
 }) {
   return (
     <Pressable
-      style={[styles.secondary, disabled && styles.disabled]}
+      style={({ pressed }) => [
+        styles.secondary,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}
       disabled={disabled}
       onPress={onPress}
       accessibilityRole="button"
@@ -122,13 +130,13 @@ const styles = StyleSheet.create({
   },
   primaryText: {
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: 16,
   },
   secondary: {
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.line,
+    borderWidth: 1.5,
+    borderColor: colors.accent,
     borderRadius: 14,
     minHeight: 52,
     paddingHorizontal: 16,
@@ -136,15 +144,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   secondaryText: {
-    color: colors.ink,
-    fontWeight: "600",
+    color: colors.accent,
+    fontWeight: "700",
     fontSize: 16,
   },
+  pressed: {
+    opacity: 0.85,
+  },
   disabled: {
-    opacity: 0.45,
+    opacity: 0.4,
   },
   link: {
     color: colors.accent,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });
