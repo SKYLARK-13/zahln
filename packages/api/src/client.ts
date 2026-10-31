@@ -2,6 +2,8 @@ import { ApiError } from "./error";
 import type {
   DailyTotals,
   ListPaymentsQuery,
+  Order,
+  Payment,
   PaymentDetail,
   PaymentPage,
   Session,
@@ -49,6 +51,21 @@ export class ZahlnClient {
       path: "/sessions",
       body: { username, password },
       auth: false,
+    });
+  }
+
+  getOrder(orderId: string) {
+    return this.request<Order>({ method: "GET", path: `/orders/${orderId}` });
+  }
+
+  // keep the same Idempotency-Key when retrying a payment
+  createPayment(orderId: string, amountCents: number, idempotencyKey: string, appVersion = "1.0.0") {
+    return this.request<Payment>({
+      method: "POST",
+      path: `/orders/${orderId}/payments`,
+      body: { amountCents },
+      idempotencyKey,
+      headers: { "X-App-Version": appVersion },
     });
   }
 
@@ -134,9 +151,12 @@ export class ZahlnClient {
     if (!response.ok) {
       const problem = await readProblem(response);
       const error = new ApiError(problem);
-      if (error.retryable && options.method === "GET" && !retried) {
-        return this.request<T>(options, true);
-      }
+      // safe to retry GET, or POST when we have an Idempotency-Key
+      const canRetry =
+        error.retryable &&
+        !retried &&
+        (options.method === "GET" || Boolean(options.idempotencyKey));
+      if (canRetry) return this.request<T>(options, true);
       throw error;
     }
 

@@ -4,6 +4,7 @@
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "npm run dev -w @zahln/web",
-    "build:web": "npm run build -w @zahln/web"
+    "build:web": "npm run build -w @zahln/web",
+    "dev:mobile": "npm run start -w @zahln/mobile"
   }
 }

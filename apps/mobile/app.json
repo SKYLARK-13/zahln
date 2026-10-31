@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Zahln",
+    "slug": "zahln-student",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Scan the till QR code to pay.",
+        "NSFaceIDUsageDescription": "Confirm payments with Face ID."
+      }
+    },
+    "android": {
+      "package": "de.zahln.student",
+      "adaptiveIcon": {
+        "backgroundColor": "#214d3c",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["CAMERA", "USE_BIOMETRIC", "USE_FINGERPRINT"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Zahln to scan till QR codes."
+        }
+      ],
+      "expo-local-authentication"
+    ]
+  }
+}
