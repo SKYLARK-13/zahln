@@ -1,64 +1,82 @@
 # zahln
 
-Take-home for Zahln. npm workspaces.
+Frontend take-home for Zahln (Mensa lunch rush). npm workspaces.
 
-- `packages/api` – shared types + fetch client
-- `apps/web` – Studierendenwerk dashboard
-- `apps/mobile` – student app + till (one Expo app, pick mode at start)
+| Package | What |
+|---------|------|
+| `packages/api` | Shared types + `ZahlnClient` (idempotency, refresh, versioned GETs) |
+| `apps/web` | Studierendenwerk finance dashboard |
+| `apps/mobile` | Student app + till in one Expo app (pick mode at login) |
 
-Install once, open as **Student** on one device and **Till** on another (or emulator).
+Design notes: [DESIGN.md](./DESIGN.md)
 
-## Dashboard
+## Deliverables
 
-**Live:** https://zahln-dashboard-c70758.netlify.app  
-Login: `finance` / `test1234`
+1. **Repo** — this private GitHub repo (commit history as built)
+2. **Android APK** — https://expo.dev/artifacts/eas/NB0aCV14L3fJIQKZ90lBuEp4XLjewCaM5b-LcxnRwnE.apk  
+   (fintech-UI build; install on phone as Student, emulator as Till — or both)
+3. **Dashboard** — https://zahln-dashboard-c70758.netlify.app  
+   Login: `finance` / `test1234`
+4. **Design doc** — [DESIGN.md](./DESIGN.md)
 
-Local:
+Candidate ID: from the take-home email (`c_…`). Live dashboard prefills it from the build env; type the same ID in the mobile app.
+
+## Run locally
 
 ```
 cp .env.example .env
-```
-
-Set `VITE_CANDIDATE_ID` in `.env`, then:
-
-```
+# set VITE_CANDIDATE_ID and EXPO_PUBLIC_CANDIDATE_ID
 npm install
-npm run dev:web
+npm run dev:web      # dashboard → http://localhost:5173
+npm run android      # native Android (preferred over Expo Go)
 ```
 
-## Student app
+### Test logins (password always `test1234`)
 
-Same `.env` can also set `EXPO_PUBLIC_CANDIDATE_ID` (optional — you can type it in the app).
+| Surface | Users |
+|---------|--------|
+| Dashboard | `finance` |
+| Student | `student`, `staff`, `guest` |
+| Till | `cashier-campus-1`, `cashier-nord-1`, `cashier-bibliothek-1` |
 
-**Recommended (real Android app, like `react-native run-android` — no Expo Go):**
+Pay PIN fallback: `1234`.
 
-```
-npm run android
-```
+**Flow:** till adds items → Show QR → student scans / pastes order id → confirm → till shows paid. Refunds from till **Refund**.
 
-That builds a native debug APK, installs it on the emulator/USB phone, and starts Metro. Camera/QR work in this build.
+## What we built
 
-At start pick **Student app** or **Till**.
+- Shared API client with `Idempotency-Key`, 401 re-login, retryable errors, `newerByVersion`
+- Student: scan QR (deep link `zahln://pay?order=…`), biometrics/PIN, result polling, history
+- Till: menu/cart, QR wait (can start next order while waiting), refunds
+- Dashboard: daily totals per mensa/till, needs-attention, search, CSV export, DE/EN
+- Installable Android APK (EAS) + live Netlify dashboard
 
-- Student: `student` / `staff` / `guest`
-- Till: `cashier-campus-1` (or other cashiers)
+## What we left out (and why)
 
-Password is always `test1234`. PIN fallback for payments: `1234`.
+| Skipped | Why |
+|---------|-----|
+| Separate student vs till store apps | One APK was enough to prove both flows; split is product packaging |
+| Kill-switch / force-update UI | API already has `paymentsEnabled` / `minAppVersion` — described in DESIGN.md |
+| Crash reporting / CI | Optional in the brief; correctness first |
+| iOS build | Brief asked for installable Android |
 
-Flow to test: till rings up → show QR → student scans / pastes order id → pay → till shows paid. Refunds from till menu.
+## Important libraries
 
-For a physical phone: enable USB debugging, plug in, then `npm run android` (or use emulator). See `apps/mobile/CONNECT-PHONE.md`.
+| Lib | Why |
+|-----|-----|
+| Expo + EAS | Android delivery without fighting local native toolchains |
+| React Navigation | Mobile stacks |
+| `expo-camera` / `expo-local-authentication` | QR scan + biometrics |
+| `react-native-qrcode-svg` | Till QR |
+| Vite + React Router | Dashboard SPA |
+| `@react-native-async-storage/async-storage` | Session + locale |
 
 ## AI tools
 
-Cursor Agent helped with scaffolding, API client, dashboard, student/till screens, and Expo notes. I own the code for the review call.
+Cursor Agent was used for:
 
-## AI tools
+- monorepo scaffolding, shared API client, dashboard and mobile screens
+- payment idempotency / session refresh / versioned reads
+- Expo / EAS / Netlify wiring and UI polish
 
-Cursor Agent was used while building this take-home:
-
-- scaffolding the monorepo, shared API client, dashboard and student app
-- wiring payment idempotency / session refresh / versioned reads
-- Expo / Android setup notes and small UI cleanup
-
-I review and own the code; the review call is on me. Commits show `Co-authored-by: Cursor` because the agent helped write them — that matches “use any AI tools you want, say which and for what.”
+I review and own the code for the review call. Some commits include `Co-authored-by: Cursor` where the agent wrote the change.
