@@ -25,6 +25,7 @@ export function App() {
     <div className="page">
       <header className="topbar">
         <p className="brand">
+          <span className="brand-mark">Z</span>
           Zahln
           <span>
             {t.appName} · {user.displayName}

@@ -79,9 +79,28 @@ p {
   font-weight: 800;
   letter-spacing: -0.03em;
   font-size: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
-.brand span {
+.brand-mark {
+  display: inline-grid !important;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--cta);
+  color: var(--cta-ink) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+  letter-spacing: 0 !important;
+}
+
+.brand > span:not(.brand-mark) {
+  flex-basis: 100%;
   display: block;
   color: rgba(255, 255, 255, 0.68);
   font-weight: 500;

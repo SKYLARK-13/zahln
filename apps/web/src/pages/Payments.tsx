@@ -11,6 +11,7 @@ export function Payments({ t, locale }: { t: Copy; locale: Locale }) {
   const { client } = useSession();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [submittedQ, setSubmittedQ] = useState("");
   const [status, setStatus] = useState<PaymentStatus | "">("");
   const [attentionOnly, setAttentionOnly] = useState(false);
   const [items, setItems] = useState<Payment[]>([]);
@@ -18,12 +19,12 @@ export function Payments({ t, locale }: { t: Copy; locale: Locale }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(true);
 
-  async function load(reset: boolean) {
+  async function load(reset: boolean, query = submittedQ) {
     setBusy(true);
     setError("");
     try {
       const page = await client.listPayments({
-        q: q.trim() || undefined,
+        q: query.trim() || undefined,
         status: status || undefined,
         needsAttention: attentionOnly ? true : undefined,
         cursor: reset ? undefined : cursor || undefined,
@@ -39,8 +40,9 @@ export function Payments({ t, locale }: { t: Copy; locale: Locale }) {
   }
 
   useEffect(() => {
-    void load(true);
-  }, [status, attentionOnly]);
+    void load(true, submittedQ);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, attentionOnly, submittedQ]);
 
   return (
     <div>
@@ -48,14 +50,21 @@ export function Payments({ t, locale }: { t: Copy; locale: Locale }) {
         className="toolbar"
         onSubmit={(event) => {
           event.preventDefault();
-          void load(true);
+          setSubmittedQ(q.trim());
         }}
       >
         <label>
           {t.search}
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setQ(next);
+              // clearing the box should restore the full list immediately
+              if (next.trim() === "" && submittedQ !== "") {
+                setSubmittedQ("");
+              }
+            }}
             placeholder={t.searchPlaceholder}
           />
         </label>
