@@ -6,6 +6,7 @@
     "dev:web": "npm run dev -w @zahln/web",
     "build:web": "npm run build -w @zahln/web",
     "dev:mobile": "npm run start -w @zahln/mobile",
+    "dev:mobile:usb": "npm run start:usb -w @zahln/mobile",
     "dev:mobile:tunnel": "npm run start:tunnel -w @zahln/mobile"
   }
 }

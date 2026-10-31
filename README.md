@@ -34,10 +34,16 @@ npm run dev:mobile
 Then open in Expo Go. Pick `student`, `staff` or `guest`. Password is always `test1234`.
 PIN fallback for payments: `1234`.
 
-If the phone QR does not open (different Wi‑Fi / hotspot), use tunnel mode:
+### Physical phone not opening?
 
-```
-npm run dev:mobile:tunnel
-```
+See `apps/mobile/CONNECT-PHONE.md`. Short version:
 
-Phone and PC must reach Metro. Also keep Expo Go updated — this app is Expo SDK 58.
+1. Project is **Expo SDK 58** — update Expo Go (or install the SDK 58 build from https://expo.dev/go).
+2. **USB (easiest on Windows):**
+   ```
+   npm run dev:mobile:usb
+   adb reverse tcp:8081 tcp:8081
+   ```
+   In Expo Go enter: `exp://127.0.0.1:8081`
+3. Or same Wi‑Fi / hotspot, then scan QR **inside Expo Go**.
+4. Tunnel needs Expo login first: `npx expo login` then `npm run dev:mobile:tunnel`.
